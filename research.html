@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dr. Nikhilanand Arya — Research</title>
+  <meta name="description" content="Research works of Dr. Nikhilanand Arya." />
+
+  <!-- reuse global stylesheet from the main site -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- small page-specific styles for the research tiles -->
+  <style>
+    /* center-column tiles grid */
+    .tiles-wrap{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+      gap:20px;
+      padding:12px 6px;
+      align-items:stretch;
+    }
+
+    .tile{
+      border-radius:14px;
+      padding:18px;
+      color:#fff;
+      min-height:160px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      box-shadow:0 10px 26px rgba(11,118,239,0.12);
+      transition:transform 0.32s ease, box-shadow 0.32s ease, filter 0.32s ease;
+      background-size:200% 200%;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .tile:hover{
+      transform:translateY(-8px) scale(1.02);
+      box-shadow:0 20px 40px rgba(11,118,239,0.18);
+      filter:brightness(1.03);
+    }
+
+    .tile h3{margin:0 0 8px;font-size:18px}
+    .tile p{margin:0;font-size:13px;opacity:0.95}
+
+    .tile .meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:12px;
+      gap:8px;
+      font-size:13px;
+      opacity:0.95;
+    }
+
+    .tag{
+      background:rgba(255,255,255,0.12);
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:12px;
+    }
+
+    /* preset gradients for visual variety */
+    .g-blue{background:linear-gradient(135deg,#0b76ef,#5ab1ff)}
+    .g-purple{background:linear-gradient(135deg,#6a11cb,#2575fc)}
+    .g-green{background:linear-gradient(135deg,#00b09b,#96c93d)}
+    .g-orange{background:linear-gradient(135deg,#ff7e5f,#feb47b)}
+    .g-pink{background:linear-gradient(135deg,#ff6a88,#ff99ac)}
+    .g-indigo{background:linear-gradient(135deg,#3b82f6,#8b5cf6)}
+
+    /* tile accent decorative circle */
+    .tile::after{
+      content:"";
+      position:absolute;
+      width:160px;height:160px;
+      right:-40px;top:-40px;
+      border-radius:50%;
+      opacity:0.12;
+      transform:rotate(20deg);
+      background:rgba(255,255,255,0.5);
+    }
+
+    /* small responsive tweaks */
+    @media (max-width:900px){
+      .tiles-wrap{grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container" role="main">
+
+    <!-- LEFT COLUMN — SECTION BUTTONS (re-using buttons from home for consistency) -->
+     <aside aria-label="Primary sections" style="text-align:left">
+      <nav class="btn-list" aria-label="Site navigation">
+        <a class="btn" href="index.html">Home</a>
+        <a class="btn" href="/journals">Journals</a>
+        <a class="btn" href="/conferences">Conferences</a>
+        <a class="btn" href="/teaching">Teaching</a>
+        <a class="btn" href="/lectures">Seminars / Lectures</a>
+        <a class="btn" href="/gallery">Gallery</a>
+        <a class="btn" href="/contact">Contact</a>
+      </nav>
+    </aside>
+
+    <!-- CENTER COLUMN — tiles show research works -->
+    <section class="center" aria-labelledby="research-heading">
+
+      <div class="tiles-wrap" aria-live="polite">
+	  
+	   <article class="tile g-indigo" tabindex="0" role="article" aria-label="IIT Patna: Multi-modal DL Architectures (Jul 2018 - Dec 2020)">
+          <div>
+		  <span class ="tag">Sep 2023 — Mar 2024</span>
+            <h3>Graph Convolutional Network based Multi-modal Learning Approaches for Breast Cancer Survival Prediction</h3>
+            <p style="text-align: justify;"> Developed advanced multi-modal deep learning frameworks to address the critical challenge of accurately 
+			predicting breast cancer prognosis and survival outcomes.
+			The first framework, MGCN-CalRF, utilizes multimodal Graph Convolutional Networks to extract modality-specific relational features and 
+			integrates them using a calibrated Random Forest classifier for prognosis prediction. The second framework, CAGCL, applies graph contrastive
+			learning to refine feature embeddings and incorporates a cross-modality attention mechanism to model complementary information across heterogeneous 
+			data modalities for survival prediction.</p>
+          </div>
+          <div class="meta">
+            <span class="tag">IIT Patna</span>
+            <span>Collaborators: Dr. Susmita Palmal, Prof. Somanath Tripathy, Dr. Sriparna Saha</span>
+          </div>
+        </article>
+
+        <article class="tile g-blue" tabindex="0" role="article" aria-label="KMITL Thailand">
+          <div>
+		  <span class ="tag">Sep 2023 — Jan 2024</span>
+            <h3 >Multi-modal Breast-Cancer Survival Estimation and Multi-modal Skin Lesion classification.</h3>
+            <p style="text-align: justify;"> Literature Survey on deep multi-modal architecture for accurately estimating the survival of breast cancer patients. 
+									The architecture is aimed to utilize six different modalities from multi-omics, clinical, and histopathology profiles of TCGA-BRCA data. 
+									We also worked on multi-modal deep learning-based architectures for skin lesion classification using dermoscopy 
+									images and demographic information of the patients.</div>
+          <div class="meta">
+            <span class="tag"> KMITL Thailand, BITS Pilani, IIT Patna</span>
+            <span>Collaborators: Dr. Sriparna Saha, Prof. Kitsuchart Pasupa, Prof. Snehanshu Saha, Dr. Archana Mathur</span>
+          </div>
+        </article>
+		
+		 <article class="tile g-indigo" tabindex="0" role="article" aria-label="BITS Pilani: Stability & Robustness (Jul 2022 - Jan 2023)">
+          <div>
+		  <span class ="tag">Jul 2022 — Jan 2023</span>
+            <h3>Towards Stability and Robustness of AI-based Multi-modal Machine Learning Classifiers for Breast Cancer Prognosis Prediction</h3>
+            <p style="text-align: justify;">Developed some state-of-the-art machine learning classifiers by incorporating additional sources of
+				information from six different modalities which include clinical, genetic, and histopathological tissue images
+				for breast cancer survival prediction. Improving stability and robustness of these classifiers by introducing
+				some deep learning-based feature extraction techniques followed by a proposal of advanced kernel function
+				for the Support Vector Machine classifier</div>
+          <div class="meta">
+            <span class="tag">BITS Pilani, IIT Patna</span>
+            <span>Collaborators: Prof. Snehanshu Saha, Dr. Sriparna Saha, Dr. Archana Mathur</span>
+          </div>
+        </article>
+		
+		  <article class="tile g-purple" tabindex="0" role="article" aria-label="IIT Patna: Ensemble Techniques (Jan 2022 - Dec 2022)">
+          <div>
+		  <span class ="tag">Jan 2022 — May 2023</span>
+            <h3>Developing Ensemble techniques for Breast Cancer Survival Prognosis</h3>
+            <p style="text-align: justify;">Proposed variors ensemble architectures for the multi-modal breast cancer surviavl prognosis. "DeSuFEn"
+				is one of them which uses rewarding algorithm to counter the effect of class imbalance and fuzzy ensemble to dynamically allocate
+				the importance of each base classifier towards getting better prediction accuracies. Further, enhancement
+				of fuzzy ensemble with the help of two non-linear functions acting as deviation and support for breast
+				cancer survival prediction.</div>
+          <div class="meta">
+            <span class="tag">IIT Patna</span>
+            <span>Collaborators: Dr. Sriparna Saha</span>
+          </div>
+        </article>
+
+
+
+      
+
+        <article class="tile g-green" tabindex="0" role="article" aria-label="IIT Patna: Generative Models for Missing Data (Jan 2021 - Dec 2021)">
+          <div>
+		   <span class ="tag">Jan 2021 — Dec 2021</span>
+            <h3>AI-based Generative Models to Handle Missing Data in Multi-modal Framework for Breast Cancer Prognosis.</h3>
+            <p style="text-align: justify;">Developed a deep learning-based generative model for handling cases where patients are not having
+				information from all the modalities. The generative model uses the power of attention technique and
+				Generative Adversarial Networks to generate the missing data from the available data. Further developed
+				deep learning-based classifiers using the generated and available data towards breast cancer survival
+				prediction.
+			</div>
+          <div class="meta">
+            <span class="tag">IIT Patna</span>
+            <span>Collaborators: Dr. Sriparna Saha</span>
+          </div>
+        </article>
+
+        <article class="tile g-orange" tabindex="0" role="article" aria-label="IIT Patna: Multi-modal DL Architectures (Jul 2018 - Dec 2020)">
+          <div>
+		  <span class ="tag">Jul 2018 — Dec 2020</span>
+            <h3>Deep Learning Multi-modal Architectures for Breast Cancer Prognosis</h3>
+            <p style="text-align: justify;"> Analysed different modalities of information from gene expression, copy number variation, and clinical
+				details of breast cancer patients towards the prognosis prediction task. Developed various deep learning
+				architectures that incorporate the concept of convolutional neural networks, attention mechanisms, and
+				stacking of machine learning classifiers over deep learning architectures to classify the patients as long-term
+				vs short-term survivors.</p>
+          </div>
+          <div class="meta">
+            <span class="tag">IIT Patna</span>
+            <span>Collaborators: Dr. Sriparna Saha</span>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN — social icons (same as home) -->
+    <aside style="text-align:right" aria-label="Social links">
+      <div class="social-col">
+        <a href="https://scholar.google.com/citations?user=hBf6EmgAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer" aria-label="Google Scholar">
+          <img src="./assets/icons/google.png" alt="Google Scholar">
+        </a>
+
+        <a href="https://www.linkedin.com/in/dr-nikhilanand-arya-785a5356/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <img src="./assets/icons/linkedin.png" alt="LinkedIn">
+        </a>
+
+        <a href="https://github.com/nikhilaryan92" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <img src="./assets/icons/github.png" alt="GitHub">
+        </a>
+
+        <a href="https://x.com/nikhilaryan92" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+          <img src="./assets/icons/twitter.png" alt="Twitter">
+        </a>
+
+        <a href="https://www.instagram.com/nikhil_aryan92/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <img src="./assets/icons/instagram.png" alt="Instagram">
+        </a>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer>
+    © <span id="year"></span> Dr. Nikhilanand Arya — All rights reserved.
+  </footer>
+
+  <script>
+    // copy the small script behavior from the homepage (set current year)
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>
