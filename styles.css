@@ -164,7 +164,21 @@ footer{
   width: 0;
   height: 0;
 }
+.cv-download-btn {
+    padding:10px 16px;
+    border-radius:8px;
+    background:#0b74de;
+    color:white;
+    border:0;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12);
+  }
 
+  .cv-download-btn:disabled {
+    opacity:0.6;
+    cursor:not-allowed;
+  }
 
 /* =============================
    RESPONSIVE (OPTION B)
