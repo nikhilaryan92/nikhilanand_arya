@@ -88,98 +88,60 @@
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 <script>
-/* Robust loader + sample usage.
-   Save a local copy at ./assets/js/html2pdf.bundle.min.js as fallback if CDN is blocked. */
 (async function () {
-  function loadScript(src, attrs = {}) {
+  function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = src;
-      for (const k in attrs) s.setAttribute(k, attrs[k]);
-      s.onload = () => resolve(s);
-      s.onerror = (e) => reject(new Error('Failed to load ' + src));
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('Failed to load ' + src));
       document.head.appendChild(s);
     });
   }
 
   async function ensureHtml2pdf() {
-    // Try CDN first
-    const cdn = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js';
-    const local = './assets/js/html2pdf.bundle.min.js'; // ensure this file exists as fallback
-    const attrs = {
-      integrity: 'sha512-YcsIPZRnXnhgypKekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9XyM54q9WlH0I1GtIsfRSAxEPPVPBJOCaO1ig==',
-      crossorigin: 'anonymous',
-      referrerpolicy: 'no-referrer'
-    };
-
-    // If already loaded, return immediately
     if (typeof html2pdf !== 'undefined') return;
-
+    const cdn = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js';
+    const local = './assets/js/html2pdf.bundle.min.js';
     try {
-      console.info('[loader] Attempting to load html2pdf from CDN...');
-      await loadScript(cdn, attrs);
-      console.info('[loader] html2pdf loaded from CDN.');
-      return;
-    } catch (cdnErr) {
-      console.warn('[loader] CDN load failed:', cdnErr);
+      await loadScript(cdn);
+      if (typeof html2pdf !== 'undefined') return;
+    } catch (e) {
+      console.warn('CDN load failed:', e);
     }
-
     try {
-      console.info('[loader] Attempting to load local fallback:', local);
       await loadScript(local);
-      if (typeof html2pdf !== 'undefined') {
-        console.info('[loader] html2pdf loaded from local fallback.');
-        return;
-      } else {
-        throw new Error('local script loaded but html2pdf not defined');
-      }
-    } catch (localErr) {
-      console.error('[loader] Local fallback failed:', localErr);
-      throw new Error('Failed to load html2pdf (CDN + local fallback failed). Check network/CSP.');
+      if (typeof html2pdf !== 'undefined') return;
+    } catch (e) {
+      console.error('Local fallback failed:', e);
     }
+    throw new Error('Could not load html2pdf from CDN or local fallback.');
   }
 
-  // Replace your existing click handler with this guarded version
   const btn = document.getElementById('download-cv-btn');
-  if (!btn) {
-    console.warn('download button not found (id=download-cv-btn)');
-    return;
-  }
+  if (!btn) return;
 
-  async function guardedOnClick(e) {
+  btn.addEventListener('click', async function guarded(e) {
+    btn.disabled = true;
+    const orig = btn.innerText;
+    btn.innerText = 'Loading PDF library…';
     try {
-      btn.disabled = true;
-      const originalText = btn.innerText;
-      btn.innerText = 'Loading PDF library…';
-      await ensureHtml2pdf(); // will throw if both attempts fail
+      await ensureHtml2pdf();
       btn.innerText = 'Preparing PDF…';
-
-      // === Put your existing CV-building + html2pdf call here ===
-      // Example minimal test that converts the whole page body:
-      await html2pdf().set({
-        margin: [10,10,10,10],
-        filename: 'test_html2pdf_ready.pdf',
-        html2canvas: { scale: 2, useCORS: true, allowTaint: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      }).from(document.body).save();
-
-      // restore button text
-      btn.innerText = originalText;
-      btn.disabled = false;
+      // === Replace the next line with your CV-building + html2pdf code ===
+      await html2pdf().set({ margin:[10,10,10,10], filename:'Dr_Nikhilanand_Arya_CV.pdf' }).from(document.body).save();
+      // ==================================================================
     } catch (err) {
-      console.error('PDF generation aborted:', err);
-      alert('Could not load html2pdf library: ' + err.message + '\n\nCheck console network tab or put a local copy at ./assets/js/html2pdf.bundle.min.js');
+      console.error(err);
+      alert('Failed to load html2pdf: ' + err.message + '\nCheck network or use a local copy at ./assets/js/html2pdf.bundle.min.js');
+    } finally {
       btn.disabled = false;
-      btn.innerText = 'Download CV (PDF)';
+      btn.innerText = orig;
     }
-  }
-
-  // remove existing listeners if any, then attach guarded listener
-  btn.replaceWith(btn.cloneNode(true));
-  const newBtn = document.getElementById('download-cv-btn');
-  newBtn.addEventListener('click', guardedOnClick);
+  });
 })();
 </script>
+
 
 
 </body>
