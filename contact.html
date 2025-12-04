@@ -49,7 +49,12 @@
         <strong>Official Email:</strong> <a href="mailto:narya@iiita.ac.in">narya@iiita.ac.in</a><br>
         <strong>Personal Email:</strong> <a href="mailto:nikhilaryan92@zohomail.in">nikhilaryan92@zohomail.in</a>
       </p>
+	   <p class="bio">
 
+      </p>
+		<button id="download-cv-btn" style="padding:10px 14px;border-radius:8px;border:none;background:#0b76ef;color:white;cursor:pointer;">
+					Download CV (PDF)
+		</button>
     </section>
 
     <!-- RIGHT COLUMN — VERTICAL SOCIAL ICONS -->
@@ -82,7 +87,167 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+<!-- Put this at the end of the page before </body> -->
+<!-- CDN: html2pdf bundle (html2canvas + jsPDF). If your environment blocks CDNs, download the bundle and serve locally -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
+<script>
+(function () {
+  const pagesToFetch = [
+    'index.html',
+    'research.html',
+    'journals.html',
+    'conferences.html',
+    'teaching.html',
+    'lectures.html',
+    'gallery.html',
+    'contact.html'
+  ];
+
+  // map of page -> human heading we will show in CV
+  const sectionNames = {
+    'index.html': 'Profile',
+    'research.html': 'Research',
+    'journals.html': 'Journal Publications',
+    'conferences.html': 'Conference Publications',
+    'teaching.html': 'Teaching',
+    'lectures.html': 'Lectures / Seminars',
+    'gallery.html': 'Gallery',
+    'contact.html': 'Contact'
+  };
+
+  // selectors used on your pages to extract main content blocks (tuned to your uploaded HTML)
+  const preferredSelectors = [
+    '.main-scroll.center',  // center column on many pages
+    '.wrap',                // some pages wrap content in .wrap
+    '.tiles-wrap',          // research page
+    '.grid',                // publications pages
+    'main.container',       // fallback main
+    'section'               // final fallback
+  ];
+
+  function extractTextFromDoc(doc) {
+    // Try preferred selectors in order; return text (trimmed) and also HTML for nicer PDF
+    for (const sel of preferredSelectors) {
+      const el = doc.querySelector(sel);
+      if (el && el.innerText.trim().length > 0) {
+        return { text: el.innerText.trim(), html: el.innerHTML.trim() };
+      }
+    }
+    // ultimate fallback: entire body
+    return { text: (doc.body && doc.body.innerText) ? doc.body.innerText.trim() : '', html: doc.body ? doc.body.innerHTML : '' };
+  }
+
+  async function fetchAndParse(url) {
+    try {
+      const resp = await fetch(url, {cache: "no-store"});
+      if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
+      const txt = await resp.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(txt, 'text/html');
+      return doc;
+    } catch (err) {
+      console.warn('Could not fetch', url, err);
+      return null;
+    }
+  }
+
+  // Build a neat HTML document for the CV from scraped pieces
+  async function buildCvHtml() {
+    const sections = [];
+
+    for (const page of pagesToFetch) {
+      const doc = (page === location.pathname.split('/').pop() || page === location.pathname) ? document : await fetchAndParse(page);
+      if (!doc) continue;
+      const extracted = extractTextFromDoc(doc);
+      // small normalization: remove duplicate footer / year lines etc by trimming repetitive lines
+      let html = extracted.html || '<div>' + escapeHtml(extracted.text).replace(/\n/g,'<br>') + '</div>';
+      // wrap in a section with heading
+      const heading = sectionNames[page] || page;
+      sections.push(`<section style="margin-bottom:18px;">
+        <h2 style="font-family:Inter, Arial, sans-serif; font-size:18px; margin:0 0 8px 0; color:#111;">${escapeHtml(heading)}</h2>
+        <div>${html}</div>
+      </section>`);
+    }
+
+    // Build a printable single-column layout
+    const now = new Date();
+    const headerHTML = `<header style="text-align:center;margin-bottom:18px;">
+      <h1 style="margin:0;font-size:22px;font-family:Inter,Arial,sans-serif;">Dr. Nikhilanand Arya</h1>
+      <div style="margin-top:6px;font-size:12px;color:#222;">Assistant Professor — Indian Institute of Information Technology, Allahabad</div>
+      <hr style="margin:12px 0;border:none;border-top:1px solid #ddd;">
+    </header>`;
+
+    const bodyHTML = `
+      <div id="cv-root" style="font-family:Inter, Arial, sans-serif; color:#222; padding:18px; width:100%; box-sizing:border-box;">
+        ${headerHTML}
+        ${sections.join('\n')}
+        <footer style="margin-top:24px;font-size:11px;color:#555; border-top:1px solid #eee; padding-top:8px;">Generated: ${now.toLocaleDateString()}</footer>
+      </div>
+    `;
+    return bodyHTML;
+  }
+
+  // Simple escape to avoid accidental script insertion from fetched pages
+  function escapeHtml(str) {
+    return (str + '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // main action triggered by button
+  async function onDownloadClick() {
+    try {
+      // give user visual feedback
+      const btn = document.getElementById('download-cv-btn');
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = 'Preparing PDF…';
+
+      const cvHtml = await buildCvHtml();
+
+      // create an offscreen container to render the CV (keeps your page untouched)
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm'; // A4 width for consistency
+      container.style.padding = '10mm';
+      container.innerHTML = cvHtml;
+      document.body.appendChild(container);
+
+      // html2pdf options (A4 portrait)
+      const opt = {
+        margin:       [10, 10, 10, 10], // top left bottom right (mm-ish)
+        filename:     'Dr_Nikhilanand_Arya_CV.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, allowTaint: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // generate and download
+      await html2pdf().set(opt).from(container).save();
+
+      // cleanup
+      document.body.removeChild(container);
+      btn.innerText = originalText;
+      btn.disabled = false;
+    } catch (err) {
+      console.error('Error generating PDF', err);
+      alert('PDF generation failed. See console for details.');
+      const btn = document.getElementById('download-cv-btn');
+      btn.disabled = false;
+      btn.innerText = 'Download CV (PDF)';
+    }
+  }
+
+  // wire up button
+  document.getElementById('download-cv-btn').addEventListener('click', onDownloadClick);
+})();
+</script>
 </body>
 
 </html>

@@ -165,17 +165,94 @@ footer{
   height: 0;
 }
 
-@media (max-width:900px) {
+
+/* =============================
+   RESPONSIVE (OPTION B)
+   ============================= */
+@media (max-width:900px){
+
+  .container{
+    grid-template-columns:1fr; /* stack columns */
+    gap:18px;
+    padding:18px;
+    height: calc(100vh - 56px);
+  }
+
+  /* Make side columns flow normally */
   .left-col, .right-col {
-    /* let them flow normally with the document */
-    max-height: none;
+    height: auto;
     overflow: visible;
     position: static;
   }
 
+  /* Make center column the only scrollable area (mobile) */
   .main-scroll {
-    /* center column remains the main scroll area; adjust if you want full-page scroll */
-    height: calc(100vh - 56px - 40px);
+    height: calc(100vh - 56px - 220px);
+    /* 
+      220px ≈ estimated height of top content (avatar + name + buttons).
+      Adjust if your actual layout is taller/shorter.
+    */
     overflow-y: auto;
+    padding-right: 0;
+  }
+
+  .social-col{
+    flex-direction:row;
+    justify-content:center;
+  }
+
+  .btn{
+    width:100%;
+  }
+
+  footer{
+    height:48px;
   }
 }
+/* ---------- Mobile: let whole page scroll (override desktop-only rules) ---------- */
+@media (max-width: 900px) {
+  /* Allow whole-page scrolling on mobile */
+  html, body {
+    height: auto;        /* allow page to grow */
+    overflow: auto;      /* enable page-level scrolling */
+  }
+
+  /* Container should expand with content instead of being viewport-locked */
+  .container {
+    height: auto;        /* let the container expand normally */
+    max-width: 1100px;
+    margin: 24px auto;   /* slightly smaller top margin on mobile */
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1fr; /* stack columns (your existing rule already does this) */
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  /* Side columns should flow with the document (already present but keep explicit) */
+  .left-col, .right-col {
+    height: auto;
+    overflow: visible;
+    position: static;
+  }
+
+  /* Center column should no longer force an inner scroll area */
+  .main-scroll {
+    height: auto;        /* don't trap the scroll inside this element */
+    overflow: visible;   /* let the page handle scrolling */
+    -webkit-overflow-scrolling: auto;
+    padding-right: 0;
+  }
+
+  /* Adjust footer sizing and spacing if needed */
+  footer {
+    position: static;    /* allow footer to be part of page flow */
+    left: auto;
+    right: auto;
+    bottom: auto;
+    height: 48px;
+    margin-top: 18px;
+    pointer-events: auto; /* allow interactions if any (was none for pinned footer) */
+  }
+}
+
