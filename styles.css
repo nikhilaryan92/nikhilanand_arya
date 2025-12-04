@@ -178,21 +178,20 @@ footer{
     height: calc(100vh - 56px);
   }
 
-  /* Make side columns flow normally */
+  /* Make side columns scrollable on mobile */
   .left-col, .right-col {
-    height: auto;
-    overflow: visible;
-    position: static;
+    /* give them an explicit max height so they can scroll independently */
+    max-height: calc(100vh - 56px - 40px); /* adjust 40px if you have additional top content */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
+    position: relative;
   }
 
-  /* Make center column the only scrollable area (mobile) */
+  /* Make center column the only (main) scrollable area — adjust so it doesn't exceed viewport */
   .main-scroll {
     height: calc(100vh - 56px - 220px);
-    /* 
-      220px ≈ estimated height of top content (avatar + name + buttons).
-      Adjust if your actual layout is taller/shorter.
-    */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding-right: 0;
   }
 
