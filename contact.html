@@ -83,243 +83,104 @@
   <footer>
     © <span id="year"></span> Dr. Nikhilanand Arya — All rights reserved.
   </footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" 
-        integrity="sha512-YcsIPZRnXnhgypKekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9XyM54q9WlH0I1GtIsfRSAxEPPVPBJOCaO1ig==" 
-        crossorigin="anonymous" 
-        referrerpolicy="no-referrer"></script>
 
-  <script>
-  <script src="./assets/js/html2pdf.bundle.min.js"></script>
 
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 <script>
-/* Improved CV generation script:
-   - Better fetch error handling & fallback (iframe when possible)
-   - Makes the render container visible (so html2canvas actually draws it)
-   - Emits console diagnostics for debugging
-*/
-(function () {
-  const pagesToFetch = [
-    'index.html',
-    'research.html',
-    'journals.html',
-    'conferences.html',
-    'teaching.html',
-    'lectures.html',
-    'gallery.html',
-    'contact.html'
-  ];
-
-  const sectionNames = {
-    'index.html': 'Profile',
-    'research.html': 'Research',
-    'journals.html': 'Journal Publications',
-    'conferences.html': 'Conference Publications',
-    'teaching.html': 'Teaching',
-    'lectures.html': 'Lectures / Seminars',
-    'gallery.html': 'Gallery',
-    'contact.html': 'Contact'
-  };
-
-  const preferredSelectors = [
-    '.main-scroll.center',
-    '.wrap',
-    '.tiles-wrap',
-    '.grid',
-    'main.container',
-    'section'
-  ];
-
-  function escapeHtml(str) {
-    return (str + '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  function extractFromDoc(doc) {
-    for (const sel of preferredSelectors) {
-      const el = doc.querySelector(sel);
-      if (el && el.innerText.trim().length > 0) {
-        return { text: el.innerText.trim(), html: el.innerHTML.trim() };
-      }
-    }
-    // fallback to body
-    return { text: (doc.body && doc.body.innerText) ? doc.body.innerText.trim() : '', html: doc.body ? doc.body.innerHTML : '' };
-  }
-
-  async function fetchAndParse(url) {
-    try {
-      const resp = await fetch(url, {cache: "no-store"});
-      if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
-      const txt = await resp.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(txt, 'text/html');
-      console.info('Fetched:', url);
-      return doc;
-    } catch (err) {
-      console.warn('Fetch failed for', url, err);
-      return null;
-    }
-  }
-
-  // Try reading the page via an iframe if fetch failed and same-origin
-  function loadViaIframe(url, timeout = 3000) {
-    return new Promise((resolve) => {
-      try {
-        const iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '0';
-        iframe.style.width = '800px';
-        iframe.style.height = '600px';
-        iframe.src = url;
-        document.body.appendChild(iframe);
-        const timer = setTimeout(() => {
-          cleanup();
-          resolve(null);
-        }, timeout);
-        function cleanup() {
-          clearTimeout(timer);
-          try { document.body.removeChild(iframe); } catch (e) {}
-        }
-        iframe.onload = () => {
-          try {
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            cleanup();
-            resolve(doc);
-          } catch (e) {
-            cleanup();
-            resolve(null);
-          }
-        };
-      } catch (e) {
-        resolve(null);
-      }
+/* Robust loader + sample usage.
+   Save a local copy at ./assets/js/html2pdf.bundle.min.js as fallback if CDN is blocked. */
+(async function () {
+  function loadScript(src, attrs = {}) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src;
+      for (const k in attrs) s.setAttribute(k, attrs[k]);
+      s.onload = () => resolve(s);
+      s.onerror = (e) => reject(new Error('Failed to load ' + src));
+      document.head.appendChild(s);
     });
   }
 
-  async function buildCvHtml() {
-    const sections = [];
+  async function ensureHtml2pdf() {
+    // Try CDN first
+    const cdn = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js';
+    const local = './assets/js/html2pdf.bundle.min.js'; // ensure this file exists as fallback
+    const attrs = {
+      integrity: 'sha512-YcsIPZRnXnhgypKekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9XyM54q9WlH0I1GtIsfRSAxEPPVPBJOCaO1ig==',
+      crossorigin: 'anonymous',
+      referrerpolicy: 'no-referrer'
+    };
 
-    for (const page of pagesToFetch) {
-      let doc = null;
-      // if this is the current page, use the live document
-      const pageName = location.pathname.split('/').pop() || location.pathname;
-      if (page === pageName || page === location.pathname) {
-        doc = document;
-      } else {
-        doc = await fetchAndParse(page);
-        // if fetch failed, try iframe fallback (works only when same-origin)
-        if (!doc) {
-          doc = await loadViaIframe(page);
-          if (doc) console.info('Loaded via iframe:', page);
-        }
-      }
+    // If already loaded, return immediately
+    if (typeof html2pdf !== 'undefined') return;
 
-      if (!doc) {
-        // can't get that page: insert a small placeholder to signal failure
-        const heading = sectionNames[page] || page;
-        sections.push(`<section style="margin-bottom:18px;">
-          <h2 style="font-family:Inter, Arial, sans-serif; font-size:18px; margin:0 0 8px 0; color:#111;">${escapeHtml(heading)}</h2>
-          <div><em>Could not fetch this section (${escapeHtml(page)}). Please serve the site from a web server (same origin) for full CV generation.</em></div>
-        </section>`);
-        continue;
-      }
-
-      const extracted = extractFromDoc(doc);
-      // prefer the HTML snippet, but sanitize in the 'text-only' fallback
-      let htmlContent = '';
-      if (extracted.html && extracted.html.trim().length > 0) {
-        htmlContent = extracted.html;
-      } else if (extracted.text && extracted.text.trim().length > 0) {
-        htmlContent = '<div>' + escapeHtml(extracted.text).replace(/\n/g, '<br>') + '</div>';
-      } else {
-        htmlContent = '<div><em>No content found on this page.</em></div>';
-      }
-
-      const heading = sectionNames[page] || page;
-      sections.push(`<section style="margin-bottom:18px;">
-        <h2 style="font-family:Inter, Arial, sans-serif; font-size:18px; margin:0 0 8px 0; color:#111;">${escapeHtml(heading)}</h2>
-        <div>${htmlContent}</div>
-      </section>`);
+    try {
+      console.info('[loader] Attempting to load html2pdf from CDN...');
+      await loadScript(cdn, attrs);
+      console.info('[loader] html2pdf loaded from CDN.');
+      return;
+    } catch (cdnErr) {
+      console.warn('[loader] CDN load failed:', cdnErr);
     }
 
-    const now = new Date();
-    const headerHTML = `<header style="text-align:center;margin-bottom:18px;">
-      <h1 style="margin:0;font-size:22px;font-family:Inter,Arial,sans-serif;">Dr. Nikhilanand Arya</h1>
-      <div style="margin-top:6px;font-size:12px;color:#222;">Assistant Professor — Indian Institute of Information Technology, Allahabad</div>
-      <hr style="margin:12px 0;border:none;border-top:1px solid #ddd;">
-    </header>`;
-
-    const bodyHTML = `
-      <div id="cv-root" style="font-family:Inter, Arial, sans-serif; color:#222; padding:18px; width:100%; box-sizing:border-box;">
-        ${headerHTML}
-        ${sections.join('\n')}
-        <footer style="margin-top:24px;font-size:11px;color:#555; border-top:1px solid #eee; padding-top:8px;">Generated: ${now.toLocaleDateString()}</footer>
-      </div>
-    `;
-    return bodyHTML;
+    try {
+      console.info('[loader] Attempting to load local fallback:', local);
+      await loadScript(local);
+      if (typeof html2pdf !== 'undefined') {
+        console.info('[loader] html2pdf loaded from local fallback.');
+        return;
+      } else {
+        throw new Error('local script loaded but html2pdf not defined');
+      }
+    } catch (localErr) {
+      console.error('[loader] Local fallback failed:', localErr);
+      throw new Error('Failed to load html2pdf (CDN + local fallback failed). Check network/CSP.');
+    }
   }
 
-  async function onDownloadClick() {
-    const btn = document.getElementById('download-cv-btn');
-    const originalText = btn.innerText;
+  // Replace your existing click handler with this guarded version
+  const btn = document.getElementById('download-cv-btn');
+  if (!btn) {
+    console.warn('download button not found (id=download-cv-btn)');
+    return;
+  }
+
+  async function guardedOnClick(e) {
     try {
       btn.disabled = true;
+      const originalText = btn.innerText;
+      btn.innerText = 'Loading PDF library…';
+      await ensureHtml2pdf(); // will throw if both attempts fail
       btn.innerText = 'Preparing PDF…';
-      const cvHtml = await buildCvHtml();
 
-      // Create a visible container (on-screen) so html2canvas can render it reliably
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '10px';
-      container.style.top = '10px';
-      container.style.width = '210mm';
-      container.style.maxWidth = 'calc(100vw - 20px)';
-      container.style.padding = '10mm';
-      container.style.background = '#fff';
-      container.style.zIndex = 2147483647; // very high so it's above everything
-      container.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
-      container.id = 'cv-pdf-container';
-      container.innerHTML = cvHtml;
+      // === Put your existing CV-building + html2pdf call here ===
+      // Example minimal test that converts the whole page body:
+      await html2pdf().set({
+        margin: [10,10,10,10],
+        filename: 'test_html2pdf_ready.pdf',
+        html2canvas: { scale: 2, useCORS: true, allowTaint: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(document.body).save();
 
-      document.body.appendChild(container);
-
-      const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     'Dr_Nikhilanand_Arya_CV.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, allowTaint: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      // Wait a short moment so fonts/images can settle (if any)
-      await new Promise(r => setTimeout(r, 250));
-
-      await html2pdf().set(opt).from(container).save();
-
-      // cleanup
-      document.body.removeChild(container);
+      // restore button text
       btn.innerText = originalText;
       btn.disabled = false;
     } catch (err) {
-      console.error('Error generating PDF', err);
-      alert('PDF generation failed. Open the console for details.');
+      console.error('PDF generation aborted:', err);
+      alert('Could not load html2pdf library: ' + err.message + '\n\nCheck console network tab or put a local copy at ./assets/js/html2pdf.bundle.min.js');
       btn.disabled = false;
-      btn.innerText = originalText;
-      // try to remove container if present
-      const existing = document.getElementById('cv-pdf-container');
-      if (existing) try { document.body.removeChild(existing); } catch (e) {}
+      btn.innerText = 'Download CV (PDF)';
     }
   }
 
-  document.getElementById('download-cv-btn').addEventListener('click', onDownloadClick);
+  // remove existing listeners if any, then attach guarded listener
+  btn.replaceWith(btn.cloneNode(true));
+  const newBtn = document.getElementById('download-cv-btn');
+  newBtn.addEventListener('click', guardedOnClick);
 })();
 </script>
+
 
 </body>
 
