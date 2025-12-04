@@ -87,11 +87,12 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-<!-- Put this at the end of the page before </body> -->
-<!-- CDN: html2pdf bundle (html2canvas + jsPDF). If your environment blocks CDNs, download the bundle and serve locally -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-
 <script>
+/* Improved CV generation script:
+   - Better fetch error handling & fallback (iframe when possible)
+   - Makes the render container visible (so html2canvas actually draws it)
+   - Emits console diagnostics for debugging
+*/
 (function () {
   const pagesToFetch = [
     'index.html',
@@ -104,7 +105,6 @@
     'contact.html'
   ];
 
-  // map of page -> human heading we will show in CV
   const sectionNames = {
     'index.html': 'Profile',
     'research.html': 'Research',
@@ -116,25 +116,32 @@
     'contact.html': 'Contact'
   };
 
-  // selectors used on your pages to extract main content blocks (tuned to your uploaded HTML)
   const preferredSelectors = [
-    '.main-scroll.center',  // center column on many pages
-    '.wrap',                // some pages wrap content in .wrap
-    '.tiles-wrap',          // research page
-    '.grid',                // publications pages
-    'main.container',       // fallback main
-    'section'               // final fallback
+    '.main-scroll.center',
+    '.wrap',
+    '.tiles-wrap',
+    '.grid',
+    'main.container',
+    'section'
   ];
 
-  function extractTextFromDoc(doc) {
-    // Try preferred selectors in order; return text (trimmed) and also HTML for nicer PDF
+  function escapeHtml(str) {
+    return (str + '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function extractFromDoc(doc) {
     for (const sel of preferredSelectors) {
       const el = doc.querySelector(sel);
       if (el && el.innerText.trim().length > 0) {
         return { text: el.innerText.trim(), html: el.innerHTML.trim() };
       }
     }
-    // ultimate fallback: entire body
+    // fallback to body
     return { text: (doc.body && doc.body.innerText) ? doc.body.innerText.trim() : '', html: doc.body ? doc.body.innerHTML : '' };
   }
 
@@ -145,32 +152,96 @@
       const txt = await resp.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(txt, 'text/html');
+      console.info('Fetched:', url);
       return doc;
     } catch (err) {
-      console.warn('Could not fetch', url, err);
+      console.warn('Fetch failed for', url, err);
       return null;
     }
   }
 
-  // Build a neat HTML document for the CV from scraped pieces
+  // Try reading the page via an iframe if fetch failed and same-origin
+  function loadViaIframe(url, timeout = 3000) {
+    return new Promise((resolve) => {
+      try {
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '800px';
+        iframe.style.height = '600px';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        const timer = setTimeout(() => {
+          cleanup();
+          resolve(null);
+        }, timeout);
+        function cleanup() {
+          clearTimeout(timer);
+          try { document.body.removeChild(iframe); } catch (e) {}
+        }
+        iframe.onload = () => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            cleanup();
+            resolve(doc);
+          } catch (e) {
+            cleanup();
+            resolve(null);
+          }
+        };
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+
   async function buildCvHtml() {
     const sections = [];
 
     for (const page of pagesToFetch) {
-      const doc = (page === location.pathname.split('/').pop() || page === location.pathname) ? document : await fetchAndParse(page);
-      if (!doc) continue;
-      const extracted = extractTextFromDoc(doc);
-      // small normalization: remove duplicate footer / year lines etc by trimming repetitive lines
-      let html = extracted.html || '<div>' + escapeHtml(extracted.text).replace(/\n/g,'<br>') + '</div>';
-      // wrap in a section with heading
+      let doc = null;
+      // if this is the current page, use the live document
+      const pageName = location.pathname.split('/').pop() || location.pathname;
+      if (page === pageName || page === location.pathname) {
+        doc = document;
+      } else {
+        doc = await fetchAndParse(page);
+        // if fetch failed, try iframe fallback (works only when same-origin)
+        if (!doc) {
+          doc = await loadViaIframe(page);
+          if (doc) console.info('Loaded via iframe:', page);
+        }
+      }
+
+      if (!doc) {
+        // can't get that page: insert a small placeholder to signal failure
+        const heading = sectionNames[page] || page;
+        sections.push(`<section style="margin-bottom:18px;">
+          <h2 style="font-family:Inter, Arial, sans-serif; font-size:18px; margin:0 0 8px 0; color:#111;">${escapeHtml(heading)}</h2>
+          <div><em>Could not fetch this section (${escapeHtml(page)}). Please serve the site from a web server (same origin) for full CV generation.</em></div>
+        </section>`);
+        continue;
+      }
+
+      const extracted = extractFromDoc(doc);
+      // prefer the HTML snippet, but sanitize in the 'text-only' fallback
+      let htmlContent = '';
+      if (extracted.html && extracted.html.trim().length > 0) {
+        htmlContent = extracted.html;
+      } else if (extracted.text && extracted.text.trim().length > 0) {
+        htmlContent = '<div>' + escapeHtml(extracted.text).replace(/\n/g, '<br>') + '</div>';
+      } else {
+        htmlContent = '<div><em>No content found on this page.</em></div>';
+      }
+
       const heading = sectionNames[page] || page;
       sections.push(`<section style="margin-bottom:18px;">
         <h2 style="font-family:Inter, Arial, sans-serif; font-size:18px; margin:0 0 8px 0; color:#111;">${escapeHtml(heading)}</h2>
-        <div>${html}</div>
+        <div>${htmlContent}</div>
       </section>`);
     }
 
-    // Build a printable single-column layout
     const now = new Date();
     const headerHTML = `<header style="text-align:center;margin-bottom:18px;">
       <h1 style="margin:0;font-size:22px;font-family:Inter,Arial,sans-serif;">Dr. Nikhilanand Arya</h1>
@@ -188,47 +259,41 @@
     return bodyHTML;
   }
 
-  // Simple escape to avoid accidental script insertion from fetched pages
-  function escapeHtml(str) {
-    return (str + '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  // main action triggered by button
   async function onDownloadClick() {
+    const btn = document.getElementById('download-cv-btn');
+    const originalText = btn.innerText;
     try {
-      // give user visual feedback
-      const btn = document.getElementById('download-cv-btn');
-      const originalText = btn.innerText;
       btn.disabled = true;
       btn.innerText = 'Preparing PDF…';
-
       const cvHtml = await buildCvHtml();
 
-      // create an offscreen container to render the CV (keeps your page untouched)
+      // Create a visible container (on-screen) so html2canvas can render it reliably
       const container = document.createElement('div');
       container.style.position = 'fixed';
-      container.style.left = '-9999px';
-      container.style.top = '0';
-      container.style.width = '210mm'; // A4 width for consistency
+      container.style.left = '10px';
+      container.style.top = '10px';
+      container.style.width = '210mm';
+      container.style.maxWidth = 'calc(100vw - 20px)';
       container.style.padding = '10mm';
+      container.style.background = '#fff';
+      container.style.zIndex = 2147483647; // very high so it's above everything
+      container.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
+      container.id = 'cv-pdf-container';
       container.innerHTML = cvHtml;
+
       document.body.appendChild(container);
 
-      // html2pdf options (A4 portrait)
       const opt = {
-        margin:       [10, 10, 10, 10], // top left bottom right (mm-ish)
+        margin:       [10, 10, 10, 10],
         filename:     'Dr_Nikhilanand_Arya_CV.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, allowTaint: false },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // generate and download
+      // Wait a short moment so fonts/images can settle (if any)
+      await new Promise(r => setTimeout(r, 250));
+
       await html2pdf().set(opt).from(container).save();
 
       // cleanup
@@ -237,17 +302,19 @@
       btn.disabled = false;
     } catch (err) {
       console.error('Error generating PDF', err);
-      alert('PDF generation failed. See console for details.');
-      const btn = document.getElementById('download-cv-btn');
+      alert('PDF generation failed. Open the console for details.');
       btn.disabled = false;
-      btn.innerText = 'Download CV (PDF)';
+      btn.innerText = originalText;
+      // try to remove container if present
+      const existing = document.getElementById('cv-pdf-container');
+      if (existing) try { document.body.removeChild(existing); } catch (e) {}
     }
   }
 
-  // wire up button
   document.getElementById('download-cv-btn').addEventListener('click', onDownloadClick);
 })();
 </script>
+
 </body>
 
 </html>
