@@ -83,8 +83,14 @@
   <footer>
     © <span id="year"></span> Dr. Nikhilanand Arya — All rights reserved.
   </footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" 
+        integrity="sha512-YcsIPZRnXnhgypKekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9XyM54q9WlH0I1GtIsfRSAxEPPVPBJOCaO1ig==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer"></script>
 
   <script>
+  <script src="./assets/js/html2pdf.bundle.min.js"></script>
+
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 <script>
