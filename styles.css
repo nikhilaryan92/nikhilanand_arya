@@ -207,38 +207,4 @@ footer{
   footer{
     height:48px;
   }
-  /* inside @media (max-width:900px) { ... } */
-
-:root {
-  /* adjust this if your top stacked header area is taller or shorter */
-  --pinned-footer-h: 56px;
-  --stacked-top-h: 220px; /* estimated height of top content (avatar + name + buttons) */
-}
-
-/* Force side columns to be scrollable on mobile */
-.left-col,
-.right-col {
-  /* override desktop rules */
-  height: auto !important;
-  max-height: calc(100vh - var(--pinned-footer-h) - var(--stacked-top-h)) !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  position: relative !important;
-}
-
-/* keep center column scrollable as before */
-.main-scroll {
-  height: calc(100vh - var(--pinned-footer-h) - var(--stacked-top-h));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-right: 0;
-}
-
-/* small accessibility nicety: show a thin top shadow so users know the area scrolls */
-.left-col::-webkit-scrollbar,
-.right-col::-webkit-scrollbar { width: 6px; height: 6px; }
-.left-col::-webkit-scrollbar-thumb,
-.right-col::-webkit-scrollbar-thumb { border-radius: 8px; opacity: 0.3; }
-
 }

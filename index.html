@@ -87,6 +87,40 @@
     // Populate current year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+<script>
+  function enableSideScroll() {
+    const footerH = 56; // match your footer height
+    const leftRight = document.querySelectorAll('.left-col, .right-col');
+    // detect the stacked top area by measuring container children above .main-scroll
+    const container = document.querySelector('.container');
+    let topStackH = 0;
+
+    // If you have a specific top wrapper, use it; otherwise measure siblings before .main-scroll
+    const main = container ? container.querySelector('.main-scroll') : null;
+    if (main && container) {
+      // sum heights of nodes before main-scroll
+      Array.from(container.children).forEach(node => {
+        if (node === main) return;
+        topStackH += node.getBoundingClientRect().height;
+      });
+    } else {
+      topStackH = 220; // fallback guess
+    }
+
+    const maxH = `calc(100vh - ${footerH}px - ${Math.round(topStackH)}px)`;
+    leftRight.forEach(el => {
+      el.style.maxHeight = maxH;
+      el.style.overflowY = 'auto';
+      el.style.overflowX = 'hidden';
+      el.style.webkitOverflowScrolling = 'touch';
+    });
+  }
+
+  // run on load and again after images/fonts might change layout
+  window.addEventListener('load', enableSideScroll);
+  setTimeout(enableSideScroll, 600); // extra pass after images
+  window.addEventListener('resize', enableSideScroll);
+</script>
 
 </body>
 
