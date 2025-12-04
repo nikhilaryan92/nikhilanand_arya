@@ -13,11 +13,11 @@
 /* Box model */
 *{box-sizing:border-box}
 
-/* Ensure root sizing and prevent page-level scrolling */
+/* Allow full-page scrolling */
 html, body {
-  height: 100%;
+  height: auto;
   margin: 0;
-  overflow: hidden; /* prevent page-level scrolling so center column only scrolls */
+  overflow: auto; /* enable scrolling */
 }
 
 body{
@@ -27,11 +27,10 @@ body{
   line-height:1.5;
 }
 
-/* Grid container — height leaves room for pinned footer (56px) */
+/* Full page scroll means container should not lock height */
 .container{
-  height: calc(100vh - 56px); /* full viewport minus footer */
   max-width:1100px;
-  margin:40px auto 0;
+  margin:40px auto 80px; /* space above footer */
   padding:24px;
   display:grid;
   grid-template-columns:0.6fr 2fr 0.3fr;
@@ -39,10 +38,10 @@ body{
   align-items:flex-start;
 }
 
-/* Ensure left & right columns remain fixed and don't scroll on desktop */
+/* Remove scroll locking from sidebars */
 .left-col, .right-col {
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow: visible;
 }
 
 /* =============================
@@ -98,9 +97,6 @@ body{
   filter:drop-shadow(0 4px 10px rgba(11,118,239,0.35));
 }
 
-/* Center text alignment helper */
-.center{text-align:center}
-
 /* Avatar */
 .avatar-frame{
   width:180px;
@@ -148,23 +144,12 @@ footer{
   pointer-events: none;
 }
 
-/* Make the center column the only scrollable area */
+/* Remove scrolling isolation from former main scroll area */
 .main-scroll {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding-right: 10px;
-
-  /* Hide scrollbar completely */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  height: auto;
+  overflow: visible;
+  padding-right: 0;
 }
-.main-scroll::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
 
 /* =============================
    RESPONSIVE (OPTION B)
@@ -172,27 +157,20 @@ footer{
 @media (max-width:900px){
 
   .container{
-    grid-template-columns:1fr; /* stack columns */
+    grid-template-columns:1fr;
     gap:18px;
     padding:18px;
-    height: calc(100vh - 56px);
+    margin-bottom: 80px;
   }
 
-  /* Make side columns scrollable on mobile */
   .left-col, .right-col {
-    /* give them an explicit max height so they can scroll independently */
-    max-height: calc(100vh - 56px - 40px); /* adjust 40px if you have additional top content */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
-    position: relative;
+    max-height:none;
+    overflow:visible;
   }
 
-  /* Make center column the only (main) scrollable area — adjust so it doesn't exceed viewport */
   .main-scroll {
-    height: calc(100vh - 56px - 220px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 0;
+    height:auto;
+    overflow:visible;
   }
 
   .social-col{
