@@ -88,12 +88,117 @@
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 <script>
+/*
+  CV fetcher + html2pdf loader
+  - Fetches these pages:
+      index.html, research.html, journals.html, conferences.html,
+      teaching.html, lectures.html, contact.html
+  - Builds a combined CV and generates a PDF
+  - Tries CDN first, then local fallback (./assets/js/html2pdf.bundle.min.js)
+*/
 (async function () {
+  const pagesToFetch = [
+    'index.html',
+    'research.html',
+    'journals.html',
+    'conferences.html',
+    'teaching.html',
+    'lectures.html',
+    'contact.html'
+  ];
+
+  const sectionNames = {
+    'index.html': 'Profile',
+    'research.html': 'Research',
+    'journals.html': 'Journal Publications',
+    'conferences.html': 'Conference Publications',
+    'teaching.html': 'Teaching',
+    'lectures.html': 'Lectures / Seminars',
+    'contact.html': 'Contact'
+  };
+
+  const preferredSelectors = [
+    '.main-scroll.center',
+    '.wrap',
+    '.tiles-wrap',
+    '.grid',
+    'main.container',
+    'section'
+  ];
+
+  // ----- helpers -----
+  function escapeHtml(str) {
+    return (str + '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function extractFromDoc(doc) {
+    for (const sel of preferredSelectors) {
+      const el = doc.querySelector(sel);
+      if (el && el.innerText.trim().length > 0) {
+        return { text: el.innerText.trim(), html: el.innerHTML.trim() };
+      }
+    }
+    return { text: (doc.body && doc.body.innerText) ? doc.body.innerText.trim() : '', html: doc.body ? doc.body.innerHTML : '' };
+  }
+
+  async function fetchAndParse(url) {
+    try {
+      const resp = await fetch(url, { cache: 'no-store' });
+      if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
+      const txt = await resp.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(txt, 'text/html');
+      return { doc, ok: true, len: txt.length };
+    } catch (err) {
+      console.warn('fetch failed', url, err);
+      return { doc: null, ok: false, error: err };
+    }
+  }
+
+  // iframe fallback (same-origin only)
+  function loadViaIframe(url, timeout = 3000) {
+    return new Promise((resolve) => {
+      try {
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '900px';
+        iframe.style.height = '600px';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        const timer = setTimeout(() => { cleanup(); resolve(null); }, timeout);
+        function cleanup() {
+          clearTimeout(timer);
+          try { document.body.removeChild(iframe); } catch (e) {}
+        }
+        iframe.onload = () => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            cleanup();
+            resolve(doc);
+          } catch (e) {
+            cleanup();
+            resolve(null);
+          }
+        };
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+
+  // ----- html2pdf loader -----
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = src;
-      s.onload = () => resolve();
+      s.onload = () => resolve(s);
       s.onerror = () => reject(new Error('Failed to load ' + src));
       document.head.appendChild(s);
     });
@@ -118,29 +223,127 @@
     throw new Error('Could not load html2pdf from CDN or local fallback.');
   }
 
-  const btn = document.getElementById('download-cv-btn');
-  if (!btn) return;
+  // ----- build combined CV HTML -----
+  async function buildCvHtml() {
+    const sections = [];
+    for (const page of pagesToFetch) {
+      let result = null;
+      const pageName = location.pathname.split('/').pop() || location.pathname;
+      if (page === pageName || page === location.pathname) {
+        result = { doc: document, ok: true, len: document.documentElement.innerHTML.length };
+      } else {
+        result = await fetchAndParse(page);
+        if ((!result || !result.ok || !result.doc) && location.protocol !== 'file:') {
+          const iframeDoc = await loadViaIframe(page);
+          if (iframeDoc) result = { doc: iframeDoc, ok: true, len: iframeDoc.documentElement.innerHTML.length };
+        }
+      }
 
-  btn.addEventListener('click', async function guarded(e) {
-    btn.disabled = true;
-    const orig = btn.innerText;
-    btn.innerText = 'Loading PDF library…';
-    try {
-      await ensureHtml2pdf();
-      btn.innerText = 'Preparing PDF…';
-      // === Replace the next line with your CV-building + html2pdf code ===
-      await html2pdf().set({ margin:[10,10,10,10], filename:'Dr_Nikhilanand_Arya_CV.pdf' }).from(document.body).save();
-      // ==================================================================
-    } catch (err) {
-      console.error(err);
-      alert('Failed to load html2pdf: ' + err.message + '\nCheck network or use a local copy at ./assets/js/html2pdf.bundle.min.js');
-    } finally {
-      btn.disabled = false;
-      btn.innerText = orig;
+      if (!result || !result.ok || !result.doc) {
+        sections.push(`<section style="margin-bottom:12px;">
+          <h2 style="font-size:16px;margin:0 0 6px 0;">${escapeHtml(sectionNames[page] || page)}</h2>
+          <div><em>Failed to fetch ${escapeHtml(page)}. Serve site via http(s) and ensure same-origin access for full CV.</em></div>
+        </section>`);
+        continue;
+      }
+
+      const extracted = extractFromDoc(result.doc);
+      const htmlContent = (extracted.html && extracted.html.trim().length > 0) ? extracted.html : '<div>' + escapeHtml(extracted.text || '').replace(/\n/g, '<br>') + '</div>';
+      sections.push(`<section style="margin-bottom:14px;">
+        <h2 style="font-size:16px;margin:0 0 6px 0;">${escapeHtml(sectionNames[page] || page)}</h2>
+        <div>${htmlContent}</div>
+      </section>`);
     }
-  });
+
+    const now = new Date();
+    const headerHTML = `<header style="text-align:center;margin-bottom:12px;">
+      <h1 style="margin:0;font-size:20px;">Dr. Nikhilanand Arya</h1>
+      <div style="font-size:12px;color:#222;">Assistant Professor — Indian Institute of Information Technology, Allahabad</div>
+      <hr style="margin:10px 0;border:none;border-top:1px solid #ddd;">
+    </header>`;
+
+    return `<div id="cv-root" style="background:#fff;color:#111;padding:18px;font-family:Inter, Arial, sans-serif;max-width:800px;margin:10px auto;">
+      ${headerHTML}
+      ${sections.join('\n')}
+      <footer style="margin-top:16px;font-size:11px;color:#666;border-top:1px solid #eee;padding-top:8px;">Generated: ${now.toLocaleString()}</footer>
+    </div>`;
+  }
+
+  // ----- generate PDF (with visible preview) -----
+  async function generateCvPdf() {
+    const btn = document.getElementById('download-cv-btn');
+    if (!btn) {
+      console.error('Button with id "download-cv-btn" not found.');
+      return;
+    }
+    const origText = btn.innerText;
+    try {
+      btn.disabled = true;
+      btn.innerText = 'Preparing CV…';
+      const cvHtml = await buildCvHtml();
+
+      // create a visible preview holder so html2canvas can capture it reliably
+      const existingHolder = document.getElementById('cv-preview-holder');
+      if (existingHolder) existingHolder.remove();
+      const holder = document.createElement('div');
+      holder.id = 'cv-preview-holder';
+      holder.style.position = 'fixed';
+      holder.style.left = '10px';
+      holder.style.top = '10px';
+      holder.style.right = '10px';
+      holder.style.bottom = '10px';
+      holder.style.overflow = 'auto';
+      holder.style.zIndex = 2147483646;
+      holder.style.background = '#f7f7f7';
+      holder.style.padding = '12px';
+      holder.innerHTML = '<div style="margin-bottom:8px;"><strong>CV Preview (temporary)</strong> — this will be used to generate the PDF.</div>' + cvHtml;
+      document.body.appendChild(holder);
+
+      // ensure html2pdf available
+      btn.innerText = 'Loading PDF library…';
+      await ensureHtml2pdf();
+      btn.innerText = 'Generating PDF…';
+
+      // short delay so fonts/images can settle
+      await new Promise(r => setTimeout(r, 300));
+
+      const rootEl = document.getElementById('cv-root');
+      if (!rootEl) throw new Error('cv-root not found after building HTML.');
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: 'Dr_Nikhilanand_Arya_CV.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(opt).from(rootEl).save();
+
+      // cleanup preview
+      try { document.body.removeChild(holder); } catch (e) {}
+      btn.innerText = origText;
+      btn.disabled = false;
+    } catch (err) {
+      console.error('Error generating CV PDF:', err);
+      alert('Error generating PDF: ' + String(err) + '\nSee console for details.');
+      btn.innerText = origText;
+      btn.disabled = false;
+    }
+  }
+
+  // attach listener (replace existing)
+  const btn = document.getElementById('download-cv-btn');
+  if (btn) {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('click', generateCvPdf);
+  } else {
+    console.warn('download-cv-btn not found — cannot attach PDF generator.');
+  }
 })();
 </script>
+
 
 
 
