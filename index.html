@@ -16,20 +16,20 @@
   <main class="container" role="main">
 
     <!-- LEFT COLUMN — SECTION BUTTONS -->
-    <aside aria-label="Primary sections" style="text-align:left">
+    <aside class="left-col" aria-label="Primary sections" style="text-align:left">
       <nav class="btn-list" aria-label="Site navigation">
         <a class="btn" href="research.html">Research</a>
-        <a class="btn" href="/journals">Journals</a>
-        <a class="btn" href="/conferences">Conferences</a>
-        <a class="btn" href="/teaching">Teaching</a>
-        <a class="btn" href="/lectures">Seminars / Lectures</a>
-        <a class="btn" href="/gallery">Gallery</a>
-        <a class="btn" href="/contact">Contact</a>
+        <a class="btn" href="journals.html">Journals</a>
+        <a class="btn" href="conferences.html">Conferences</a>
+        <a class="btn" href="teaching.html">Teaching</a>
+        <a class="btn" href="lectures.html">Seminars / Lectures</a>
+        <a class="btn" href="gallery.html">Gallery</a>
+        <a class="btn" href="contact.html">Contact</a>
       </nav>
     </aside>
 
-    <!-- CENTER COLUMN — PROFILE + INTRO -->
-    <section class="center" aria-labelledby="profile-heading">
+    <!-- CENTER COLUMN — PROFILE + INTRO (scrollable) -->
+    <section class="main-scroll center" aria-labelledby="profile-heading" tabindex="0">
 
       <!-- Profile Photo -->
       <div style="display:flex;justify-content:center;margin-bottom:25px">
@@ -48,10 +48,12 @@
         Dr. Arya has experience as an Assistant Professor at KIIT University and as a Software Engineer at LTIMindtree. His research contributions span graph neural networks, fuzzy ensembles, EfficientNet-based skin lesion classification, and robust multi-modal breast cancer survival prediction frameworks. He has received multiple fellowships and awards, including the MoE PhD Fellowship, SERB ITS Travel Grant, Outstanding TA Award (IIT Patna), and various recognitions for academic and professional excellence.
       </p>
 
+      <!-- Add more center content here as needed -->
+
     </section>
 
     <!-- RIGHT COLUMN — VERTICAL SOCIAL ICONS -->
-    <aside style="text-align:right" aria-label="Social links">
+    <aside class="right-col" style="text-align:right" aria-label="Social links">
       <div class="social-col">
         <a href="https://scholar.google.com/citations?user=hBf6EmgAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer" aria-label="Google Scholar">
           <img src="./assets/icons/google.png" alt="Google Scholar">
@@ -80,6 +82,11 @@
   <footer>
     © <span id="year"></span> Dr. Nikhilanand Arya — All rights reserved.
   </footer>
+
+  <script>
+    // Populate current year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
 </body>
 

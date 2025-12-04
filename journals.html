@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Publications — Journals</title>
+  
+  <!-- reuse global stylesheet from the main site -->
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card-radius:18px;
+      --gap:18px;
+      --max-width:1100px;
+      --glass: rgba(255,255,255,0.04);
+    }
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: radial-gradient(1200px 600px at 10% 10%, #071133 0%, transparent 12%), radial-gradient(900px 500px at 90% 90%, #112233 0%, transparent 12%), var(--bg); color:#e6eef8}
+    .wrap{max-width:var(--max-width);margin:0 auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    h1{font-size:28px;margin:0 0 6px 0}
+    p.lead{margin:0;color:#a9b7d6}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--gap);margin-top:8px}
+
+    .tile{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border-radius:var(--card-radius);
+      padding:18px;
+      min-height:120px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      position:relative;
+      overflow:hidden;
+      transition:transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .28s;
+    }
+    .tile:hover{transform:translateY(-8px);box-shadow:0 18px 50px rgba(2,6,23,0.8)}
+
+    /* gradient accent stripe */
+    .tile::before{
+      content:'';position:absolute;left:-40%;top:-40%;width:200%;height:120%;
+      background: linear-gradient(135deg, rgba(255,120,120,0.14), rgba(255,200,80,0.12), rgba(120,160,255,0.12));
+      mix-blend-mode:screen;opacity:.7;transform:skewY(-8deg);
+      pointer-events:none;
+    }
+
+    .tile-inner{position:relative;z-index:2}
+    .title{font-weight:700;margin:0 0 6px 0;font-size:15px}
+    .meta{font-size:12px;color:#cbd7ee;margin-bottom:10px}
+    .doi{font-size:12px;color:#d7e7ff;word-break:break-all}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px;color:#cdd9ff;margin-top:8px}
+.tile-link {
+  text-decoration: none;
+  color: inherit;        /* ensures white text stays white */
+  display: block;
+}
+
+.tile-link * {
+  color: inherit !important;   /* forces all nested text to remain white */
+}
+
+    footer{margin-top:28px;color:#9fb0d6;font-size:13px}
+
+    /* responsive tweaks */
+    @media (max-width:520px){h1{font-size:20px}.wrap{padding:16px}}
+  </style>
+</head>
+
+<body>
+
+  <main class="container" role="main">
+
+    <!-- LEFT COLUMN — SECTION BUTTONS -->
+    <aside aria-label="Primary sections" style="text-align:left">
+      <nav class="btn-list" aria-label="Site navigation">
+		<a class="btn" href="index.html">Home</a>
+        <a class="btn" href="research.html">Research</a>
+        
+        <a class="btn" href="conferences.html">Conferences</a>
+        <a class="btn" href="teaching.html">Teaching</a>
+        <a class="btn" href="lectures.html">Seminars / Lectures</a>
+        <a class="btn" href="gallery.html">Gallery</a>
+        <a class="btn" href="contact.html">Contact</a>
+      </nav>
+    </aside>
+
+    <!-- CENTER COLUMN — PROFILE + INTRO -->
+    <section class="main-scroll center" aria-labelledby="journals-heading">
+	<h1>Journal Publications (Total: 10)</h1
+     <div class="wrap">
+
+    <main class="grid">
+
+<a class="tile-link" href="https://doi.org/10.1109/JBHI.2024.3449756" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 10">
+    <div class="tile-inner">
+      <div class="title">CAGCL: Predicting Short- and Long-Term Breast Cancer Survival with Cross-Modal Attention and Graph Contrastive Learning</div>
+      <div class="meta">S. Palmal, S. Saha, Nikhilanand Arya, S. Tripathy; <em>IEEE Journal of Biomedical and Health Informatics</em> (2024). <strong>(Impact Factor: 6.7)</strong></div>
+      <div class="doi">DOI: 10.1109/JBHI.2024.3449756</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1093/bfgp/elae015" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 9">
+    <div class="tile-inner">
+      <div class="title">Breast cancer prognosis through the use of multi-modal classifiers: Current state of the art and the way forward.</div>
+      <div class="meta">A. Mathur, Nikhilanand Arya, K. Pasupa, S. Saha, S. Roy, S. Saha; <em>Briefings in Functional Genomics, Oxford University Press</em>, Volume 23, Issue 5 (30 April 2024). <strong>(Impact Factor: 4.3)</strong></div>
+      <div class="doi">DOI: 10.1093/bfgp/elae015</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1016/j.asoc.2024.111379" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 8">
+    <div class="tile-inner">
+      <div class="title">Integrative prognostic modeling for breast cancer: Unveiling optimal multimodal combinations using graph convolutional networks and calibrated random forest</div>
+      <div class="meta">S. Palmal, Nikhilanand Arya, S. Saha, S. Tripathy; <em>Applied Soft Computing</em>, Volume 154, 111379 (March 2024). <strong>(Impact Factor: 8.7)</strong></div>
+      <div class="doi">DOI: 10.1016/j.asoc.2024.111379</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1038/s41598-023-47543-5" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 7">
+    <div class="tile-inner">
+      <div class="title">Deviation-support based fuzzy ensemble of multi-modal deep learning classifiers for breast cancer prognosis prediction</div>
+      <div class="meta">Nikhilanand Arya, S. Saha; <em>Scientific Reports</em>, 13, 21326 (03 December 2023). <strong>(Impact Factor: 4.9)</strong></div>
+      <div class="doi">DOI: 10.1038/s41598-023-47543-5</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1038/s41598-023-40341-z" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 6">
+    <div class="tile-inner">
+      <div class="title">Breast cancer survival prognosis using the graph convolutional network with Choquet fuzzy integral</div>
+      <div class="meta">S. Palmal, Nikhilanand Arya, S. Saha, S. Tripathy; <em>Scientific Reports</em>, 13, 14757 (07 September 2023). <strong>(Impact Factor: 4.9)</strong></div>
+      <div class="doi">DOI: 10.1038/s41598-023-40341-z</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1038/s41598-023-30143-8" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 5">
+    <div class="tile-inner">
+      <div class="title">Improving the robustness and stability of a machine learning model for breast cancer prognosis through the use of multi-modal classifiers</div>
+      <div class="meta">Nikhilanand Arya, S. Saha, A. Mathur, S. Saha; <em>Scientific Reports</em>, 13, 4079 (11 March 2023). <strong>(Impact Factor: 4.9)</strong></div>
+      <div class="doi">DOI: 10.1038/s41598-023-30143-8</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1109/TCBB.2022.3198879" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 4">
+    <div class="tile-inner">
+      <div class="title">Proposal of SVM Utility Kernel for Breast Cancer Survival Estimation</div>
+      <div class="meta">Nikhilanand Arya, A. Mathur, S. Saha, S. Saha; <em>IEEE/ACM Transactions on Computational Biology and Bioinformatics</em>, vol.20 no.2 (22 August 2022). <strong>(Impact Factor: 4.5)</strong></div>
+      <div class="doi">DOI: 10.1109/TCBB.2022.3198879</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1109/TCBB.2021.3090458" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 3">
+    <div class="tile-inner">
+      <div class="title">Generative Incomplete Multi-View Prognosis Predictor for Breast Cancer: GIMPP</div>
+      <div class="meta">Nikhilanand Arya, S. Saha; <em>IEEE/ACM Transactions on Computational Biology and Bioinformatics</em>, vol.19 no.4 (18 June 2021). <strong>(Impact Factor: 4.5)</strong></div>
+      <div class="doi">DOI: 10.1109/TCBB.2021.3090458</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1109/TCBB.2020.3018467" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 2">
+    <div class="tile-inner">
+      <div class="title">Multi-Modal Classification for Human Breast Cancer Prognosis Prediction: Proposal of Deep-Learning Based Stacked Ensemble Model</div>
+      <div class="meta">Nikhilanand Arya, S. Saha; <em>IEEE/ACM Transactions on Computational Biology and Bioinformatics</em>, vol.19 no.2 (21 August 2020). <strong>(Impact Factor: 4.5)</strong></div>
+      <div class="doi">DOI: 10.1109/TCBB.2020.3018467</div>
+    </div>
+  </article>
+</a>
+
+<a class="tile-link" href="https://doi.org/10.1016/j.knosys.2021.106965" target="_blank" rel="noopener noreferrer">
+  <article class="tile" aria-label="Journal 10">
+    <div class="tile-inner">
+      <div class="title">Multi-modal advanced deep learning architectures for breast cancer survival prediction</div>
+      <div class="meta">Nikhilanand Arya, S. Saha; <em>Knowledge-Based Systems</em>, Volume 221, 106965 (7 June 2021). <strong>(Impact Factor: 8.8)</strong></div>
+      <div class="doi">DOI: 10.1016/j.knosys.2021.106965</div>
+    </div>
+  </article>
+</a>
+
+
+    </main>
+
+  </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN — VERTICAL SOCIAL ICONS -->
+    <aside style="text-align:right" aria-label="Social links">
+      <div class="social-col">
+        <a href="https://scholar.google.com/citations?user=hBf6EmgAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer" aria-label="Google Scholar">
+          <img src="./assets/icons/google.png" alt="Google Scholar">
+        </a>
+
+        <a href="https://www.linkedin.com/in/dr-nikhilanand-arya-785a5356/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <img src="./assets/icons/linkedin.png" alt="LinkedIn">
+        </a>
+
+        <a href="https://github.com/nikhilaryan92" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <img src="./assets/icons/github.png" alt="GitHub">
+        </a>
+
+        <a href="https://x.com/nikhilaryan92" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+          <img src="./assets/icons/twitter.png" alt="Twitter">
+        </a>
+
+        <a href="https://www.instagram.com/nikhil_aryan92/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <img src="./assets/icons/instagram.png" alt="Instagram">
+        </a>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer>
+    © <span id="year"></span> Dr. Nikhilanand Arya — All rights reserved.
+  </footer>
+
+</body>
+
+</html>

@@ -10,24 +10,39 @@
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
+/* Box model */
 *{box-sizing:border-box}
 
+/* Ensure root sizing and prevent page-level scrolling */
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* prevent page-level scrolling so center column only scrolls */
+}
+
 body{
-  margin:0;
   background:var(--bg);
   color:#111;
   font-size:16px;
   line-height:1.5;
 }
 
+/* Grid container — height leaves room for pinned footer (56px) */
 .container{
+  height: calc(100vh - 56px); /* full viewport minus footer */
   max-width:1100px;
-  margin:40px auto;
+  margin:40px auto 0;
   padding:24px;
   display:grid;
-  grid-template-columns:0.6fr 3fr 0.3fr;
+  grid-template-columns:0.6fr 2fr 0.3fr;
   gap:30px;
   align-items:flex-start;
+}
+
+/* Ensure left & right columns remain fixed and don't scroll */
+.left-col, .right-col {
+  height: 100%;
+  overflow: hidden;
 }
 
 /* =============================
@@ -83,9 +98,10 @@ body{
   filter:drop-shadow(0 4px 10px rgba(11,118,239,0.35));
 }
 
-/* Center */
+/* Center text alignment helper */
 .center{text-align:center}
 
+/* Avatar */
 .avatar-frame{
   width:180px;
   height:180px;
@@ -101,6 +117,7 @@ body{
   object-fit:cover;
 }
 
+/* Headings & bio */
 h1{
   margin:6px 0 8px;
   font-size:26px;
@@ -114,14 +131,40 @@ p.bio{
   text-align:justify;
 }
 
-/* Footer */
+/* FOOTER (pinned) */
 footer{
-  max-width:1100px;
-  margin:22px auto;
-  text-align:center;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color:#888;
   font-size:13px;
+  background: transparent;
+  z-index: 20;
+  pointer-events: none; /* let clicks pass through if needed; remove if footer should be interactive */
 }
+
+/* Make the center column the only scrollable area */
+.main-scroll {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-right: 10px;
+
+  /* Hide scrollbar completely */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/old Edge */
+}
+.main-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 
 /* Responsive */
 @media (max-width:900px){
@@ -129,6 +172,7 @@ footer{
     grid-template-columns:1fr;
     gap:18px;
     padding:18px;
+    height: calc(100vh - 56px);
   }
   .social-col{
     flex-direction:row;
@@ -136,5 +180,10 @@ footer{
   }
   .btn{
     width:100%;
+  }
+
+  /* On small screens, footer may be shorter */
+  footer{
+    height:48px;
   }
 }
