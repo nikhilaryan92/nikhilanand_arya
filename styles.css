@@ -270,3 +270,53 @@ footer{
   }
 }
 
+/* ----------------------------
+   Timeline-specific styles
+   ---------------------------- */
+
+.timeline-wrapper{
+  margin-top:28px;
+  border-radius:12px;
+  padding:18px;
+  background:linear-gradient(180deg,#f8fbff, #ffffff);
+  box-shadow:var(--card-shadow);
+}
+.timeline-header{display:flex;align-items:center;justify-content:space-between}
+.timeline-title{font-size:18px;font-weight:700}
+.timeline-sub{color:var(--muted);font-size:13px}
+
+/* SVG road */
+.road-svg{width:100%;height:320px;display:block;margin-top:12px}
+.road-path{fill:none;stroke:#e6eefc;stroke-width:22;stroke-linecap:round;stroke-linejoin:round}
+.road-stroke{fill:none;stroke:#cbdffd;stroke-width:6;stroke-linecap:round}
+
+/* milestone styling */
+.milestone{cursor:pointer;outline:none}
+.milestone .dot{r:10}
+.milestone .dot-fill{fill:#fff;stroke:var(--primary);stroke-width:3}
+.milestone text.label{font-size:12px;pointer-events:none;dominant-baseline:middle}
+
+/* tooltip */
+.tooltip{
+  position:fixed;
+  z-index:40;
+  max-width:320px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:#0f1724;
+  color:#fff;
+  font-size:13px;
+  box-shadow:0 8px 24px rgba(2,6,23,0.5);
+  display:none;
+  pointer-events:none;
+}
+.tooltip .year{font-weight:700;margin-bottom:4px}
+.tooltip .detail{font-size:13px;color:#d1d5db;margin-top:2px}
+
+/* keep timeline responsive */
+@media (max-width:600px){
+  .road-svg{height:260px}
+  .timeline-wrapper{padding:14px}
+  .timeline-title{font-size:16px}
+  .tooltip{max-width:240px;font-size:12px}
+}

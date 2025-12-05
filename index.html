@@ -48,7 +48,34 @@
         Dr. Arya has experience as an Assistant Professor at KIIT University and as a Software Engineer at LTIMindtree. His research contributions span graph neural networks, fuzzy ensembles, EfficientNet-based skin lesion classification, and robust multi-modal breast cancer survival prediction frameworks. He has received multiple fellowships and awards, including the MoE PhD Fellowship, SERB ITS Travel Grant, Outstanding TA Award (IIT Patna), and various recognitions for academic and professional excellence.
       </p>
 
-      <!-- Add more center content here as needed -->
+      <!-- Timeline / Curvy Road -->
+      <div class="timeline-wrapper" aria-label="Life timeline">
+        <div class="timeline-header">
+          <div>
+            <div class="timeline-title">Timeline</div>
+            <div class="timeline-sub"></div>
+          </div>
+          <div class="timeline-sub">1992 → Present</div>
+        </div>
+
+        <!-- SVG Road -->
+        <svg class="road-svg" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Curvy timeline road">
+          <!-- wide background road -->
+          <path id="roadBg" class="road-path" d="M60 300 C220 260, 340 80, 520 140 C700 200, 820 40, 1140 80" />
+          <!-- inner stroke to give road impression -->
+          <path id="roadStroke" class="road-stroke" d="M60 300 C220 260, 340 80, 520 140 C700 200, 820 40, 1140 80" />
+
+          <!-- group where JS will insert milestone groups -->
+          <g id="milestones-g"></g>
+        </svg>
+
+        <!-- Tooltip shown on hover -->
+        <div id="tooltip" class="tooltip" role="status" aria-hidden="true">
+          <div class="year" id="tt-year">Year</div>
+          <div class="detail" id="tt-detail">Details go here</div>
+        </div>
+
+      </div>
 
     </section>
 
@@ -86,6 +113,144 @@
   <script>
     // Populate current year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Milestone data — year, short label, full detail (shown in tooltip), and position fraction along path (0..1)
+    const milestones = [
+      {year: '1992', label: 'Born', detail: 'DOB: 4th Oct 1992.', t: 0.02},
+      {year: '2008', label: 'Matriculation', detail: 'Matriculation: 86.8% from CBSE.', t: 0.18},
+      {year: '2010', label: '10+2', detail: '10+2 (Higher Secondary): 74.67% from CBSE.', t: 0.30},
+      {year: '2015', label: 'B.Tech.', detail: 'B.Tech. (Information Technology) @ MAKAUT: 7.89 CGPA', t: 0.47},
+      {year: '2017', label: 'Mindtree', detail: 'Mindtree (Software Engineer): Oct 2015 - Jun 2017', t: 0.58},
+      {year: '2019', label: 'M.Tech.', detail: 'M.Tech. (Mathematics & Computing) @ IIT Patna: 8.99 CGPA', t: 0.68},
+      {year: '2023', label: 'Ph.D.', detail: 'Ph.D. (Computer Science & Engineering) @ IIT Patna: 8.5 CGPA', t: 0.80},
+      {year: '2025', label: 'KIIT', detail: 'Assistant Professor @ KIIT University: Jan 2024 - Sep 2025', t: 0.88},
+      {year: 'Present', label: 'IIIT-A', detail: 'Assistant Professor @ IIIT Allahabad: Oct 2025 - Present', t: 0.98}
+    ];
+
+    // Create SVG milestone nodes positioned along the path
+    (function createMilestones(){
+      const svg = document.querySelector('.road-svg');
+      const path = document.getElementById('roadBg');
+      const g = document.getElementById('milestones-g');
+      const pathLen = path.getTotalLength();
+
+      milestones.forEach((m, idx) => {
+        const pt = path.getPointAtLength(m.t * pathLen);
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('class','milestone');
+        group.setAttribute('data-year', m.year);
+        group.setAttribute('data-detail', m.detail);
+        group.setAttribute('aria-label', `${m.year} ${m.label}`);
+        group.setAttribute('tabindex','0');
+
+        // circle background (white center with accent stroke)
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pt.x);
+        circle.setAttribute('cy', pt.y);
+        circle.setAttribute('r', 12);
+        circle.setAttribute('class','dot-fill');
+        circle.setAttribute('fill','#fff');
+        circle.setAttribute('stroke',getComputedStyle(document.documentElement).getPropertyValue('--primary') || '#276EF1');
+        circle.setAttribute('stroke-width','3');
+
+        // small inner dot
+        const inner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        inner.setAttribute('cx', pt.x);
+        inner.setAttribute('cy', pt.y);
+        inner.setAttribute('r', 4);
+        inner.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--primary') || '#276EF1');
+
+        // label (year) slightly offset
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', pt.x + 18);
+        label.setAttribute('y', pt.y + 6);
+        label.setAttribute('class','label');
+        label.setAttribute('fill','#0f1724');
+        label.textContent = m.year;
+
+        group.appendChild(circle);
+        group.appendChild(inner);
+        group.appendChild(label);
+
+        // mouse / keyboard events for tooltip
+        group.addEventListener('mouseenter', showTooltip);
+        group.addEventListener('mousemove', moveTooltip);
+        group.addEventListener('mouseleave', hideTooltip);
+        // keyboard accessibility: show tooltip on focus
+        group.addEventListener('focus', (e)=>{ showTooltip(e); });
+        group.addEventListener('blur', hideTooltip);
+
+        g.appendChild(group);
+      });
+    })();
+
+    const tooltip = document.getElementById('tooltip');
+    const ttYear = document.getElementById('tt-year');
+    const ttDetail = document.getElementById('tt-detail');
+
+    function showTooltip(evt){
+      const target = evt.currentTarget;
+      const year = target.getAttribute('data-year');
+      const detail = target.getAttribute('data-detail');
+      ttYear.textContent = year;
+      ttDetail.textContent = detail;
+      tooltip.style.display = 'block';
+      tooltip.setAttribute('aria-hidden','false');
+
+      // position near mouse (if available)
+      if(evt.type.startsWith('mouse')) moveTooltip(evt);
+      else{
+        // if keyboard focus, position near element center
+        const bbox = target.getBBox();
+        const x = bbox.x + bbox.width/2;
+        const y = bbox.y - 10;
+        positionTooltip(x, y);
+      }
+    }
+
+    function moveTooltip(evt){
+      // prefer mouse coordinates
+      const x = evt.clientX;
+      const y = evt.clientY;
+      positionTooltip(x + 12, y - 14);
+    }
+
+    function positionTooltip(x, y){
+      // keep tooltip within viewport bounds
+      const pad = 12;
+      const ttRect = tooltip.getBoundingClientRect();
+      let left = x;
+      let top = y - ttRect.height;
+
+      if(left + ttRect.width + pad > window.innerWidth) left = window.innerWidth - ttRect.width - pad;
+      if(left < pad) left = pad;
+      if(top < pad) top = y + 20; // flip below cursor if no space above
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    }
+
+    function hideTooltip(){
+      tooltip.style.display = 'none';
+      tooltip.setAttribute('aria-hidden','true');
+    }
+
+    // Make milestones re-calc positions on resize for responsiveness
+    window.addEventListener('resize', ()=>{
+      const path = document.getElementById('roadBg');
+      const pathLen = path.getTotalLength();
+      const groups = document.querySelectorAll('#milestones-g .milestone');
+      groups.forEach((g, idx)=>{
+        const t = milestones[idx].t;
+        const pt = path.getPointAtLength(t * pathLen);
+        const circles = g.querySelectorAll('circle');
+        circles.forEach(c=>{ c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); });
+        const label = g.querySelector('text');
+        label.setAttribute('x', pt.x + 18);
+        label.setAttribute('y', pt.y + 6);
+      });
+    });
+
   </script>
 
 </body>
